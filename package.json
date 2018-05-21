@@ -1,0 +1,14 @@
+{
+  "name": "dhm_import",
+  "author": "Philipp Hagemeister <phihag@phihag.de>",
+  "description": "Importer for players from the  DHM",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/phihag/dhm_import.git"
+  },
+  "dependencies": {
+    "async": "*"
+  },
+  "devDependencies": {},
+  "private": true
+}
