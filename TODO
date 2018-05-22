@@ -1,5 +1,6 @@
-set up project basics
-read Kim's input files
+eliminate duplicates
+strip spaces in player's names
+
 download at turnier.de (and cache)
 	last state league and all leagues therein (e.g. LL/VL/OL)
 	last 3 tournaments
