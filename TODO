@@ -1,8 +1,14 @@
-have a concept of seasons (maybe an admin interface)
-download at turnier.de (and cache)
+"admin" interface:
+	create season
+	list seasons
+	delete season
+	download bax for season
+
+download from turnier.de (and cache)
 	last state league and all leagues therein (e.g. LL/VL/OL)
 	last 3 tournaments
-download BAX (and cache)
+	store download date
+	store download version
 if multiple players with the name @turnier.de : ask which one (show last tournaments, club, link to turnier.de)
 output xlsx
 
