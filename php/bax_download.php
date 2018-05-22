@@ -1,7 +1,7 @@
 <?php
-namespace bmtmgr;
+namespace dhm_import;
 
-require_once \dirname(__DIR__) . '/src/common.php';
+require __DIR__ . '/cachedb.php';
 
 function _curl_req($ch, $url) {
 	\curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
@@ -29,18 +29,11 @@ function _curl_req($ch, $url) {
 	return [$cookie_str, $content];
 }
 
-
-utils\csrf_protect();
-$u = user\check_current();
-$u->require_perm('admin');
-
-utils\require_get_params(['season_id']);
-$season = Season::by_id($_GET['season_id']);
-
-if (!\preg_match('/^Ligen NRW 20([0-9]{2})(?:-|\/)(?:20)?([0-9]{2})$/', $season->name, $matches)) {
-	throw new \Exception('Cannot extract years from ' . $season->name);
+if (!isset($_GET['season_digits']) || !\preg_match('/^[0-9]{4}$/', $_GET['season_digits'])) {
+	throw new \Exception('Missing season_digits!');
 }
-$season_digits = $matches[1] . $matches[2];
+$season_digits = $_GET['season_digits'];
+
 
 $ch = \curl_init();
 
@@ -76,7 +69,17 @@ $FIELDS = [
 ];
 $count = 100000;
 
-Model::beginTransaction();
+$db->beginTransaction();
+
+$db->execute('DROP TABLE IF EXISTS bax');
+$db->execute('CREATE TABLE bax (
+	textid TEXT PRIMARY KEY,
+	baxd INTEGER,
+	baxm INTEGER,
+	baxe INTEGER,
+	season TEXT
+)');
+
 $pcount = 0;
 foreach (['m', 'f'] as $gender) {
 	foreach ($FIELDS as $online_discipline=>$db_key) {
@@ -85,7 +88,7 @@ foreach (['m', 'f'] as $gender) {
 		\curl_setopt($ch, \CURLOPT_URL, $bax_url);
 		$result = \curl_exec($ch);
 
-		$s = $GLOBALS['db']->prepare('UPDATE player SET ' . $db_key . '=? WHERE season_id=? AND textid=?');
+		$s = $db->prepare('INSERT INTO bax SET ' . $db_key . '=? WHERE season_id=? AND textid=?');
 		preg_match_all(
 			'/^\s*<td align=\'right\'>&nbsp;([0-9]+-[0-9]+)&nbsp;<\/td>.*?<td align=\'center\'><b>([0-9]+)<\/b><\/td>/ms',
 			$result, $matches, \PREG_SET_ORDER);
@@ -95,7 +98,7 @@ foreach (['m', 'f'] as $gender) {
 		}
 	}
 }
-Model::commit();
+$db->commit();
 
 echo 'Imported ' . $pcount . ' entries.';
 
